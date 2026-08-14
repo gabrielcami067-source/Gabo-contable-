@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GABO CONTABLE - Plan de Cuentas</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#111827,#1e3a8a);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+.app{width:min(720px,100%);background:#fff;color:#172033;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px #0008}
+header{padding:24px;text-align:center;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff}
+header h1{margin:0;font-size:32px}header p{margin:7px 0 0;opacity:.9}
+.screen{padding:28px}.hidden{display:none}
+.btn{border:0;border-radius:14px;padding:15px 20px;font-size:17px;font-weight:700;cursor:pointer;transition:.15s;width:100%;margin-top:12px}.btn:hover{transform:translateY(-2px)}
+.primary{background:#2563eb;color:white}.green{background:#16a34a;color:white}.gray{background:#e5e7eb;color:#172033}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}.box{background:#f3f4f6;padding:12px;border-radius:14px;text-align:center}.box b{display:block;font-size:21px;color:#2563eb}
+.question{font-size:25px;font-weight:800;margin:15px 0 20px;line-height:1.25}.sub{color:#667085;margin-bottom:14px}
+.answers{display:grid;gap:11px}.answer{border:2px solid #dbe1ea;background:#fff;border-radius:14px;padding:15px;text-align:left;font-size:17px;font-weight:700;cursor:pointer}.answer:hover{border-color:#2563eb;background:#eff6ff}.answer.correct{background:#dcfce7;border-color:#16a34a;color:#166534}.answer.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b}
+.feedback{margin-top:15px;padding:13px;border-radius:12px;font-weight:700;display:none}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}
+.progress{height:9px;background:#e5e7eb;border-radius:20px;overflow:hidden;margin:15px 0 5px}.bar{height:100%;background:#2563eb;width:0%;transition:.3s}
+.score{font-size:50px;font-weight:900;text-align:center;color:#2563eb}.badge{display:inline-block;background:#ede9fe;color:#6d28d9;padding:8px 14px;border-radius:20px;font-weight:800}
+ul{line-height:1.8}
+@media(max-width:520px){header h1{font-size:26px}.screen{padding:20px}.question{font-size:21px}.info{grid-template-columns:1fr 1fr 1fr}.box{font-size:13px}.box b{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1>📚 GABO CONTABLE</h1>
+<p>Desafío: Plan de Cuentas – Empresa Comercial</p>
+</header>
+
+<section id="start" class="screen">
+<h2>🎮 ¡Poné a prueba tus conocimientos!</h2>
+<p>Clasificá cuentas y aprendé jugando. Cada respuesta correcta suma puntos.</p>
+<ul>
+<li>❤️ Tenés 3 vidas.</li>
+<li>🏆 100 puntos por respuesta correcta.</li>
+<li>📈 Las preguntas mezclan cuentas, Debe y Haber.</li>
+<li>📱 Funciona en celular y computadora.</li>
+</ul>
+<button class="btn primary" onclick="startGame()">▶ COMENZAR JUEGO</button>
+</section>
+
+<section id="game" class="screen hidden">
+<div class="info">
+<div class="box">Puntos<b id="score">0</b></div>
+<div class="box">Vidas<b id="lives">❤️❤️❤️</b></div>
+<div class="box">Pregunta<b id="counter">1/15</b></div>
+</div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div class="sub" id="category"></div>
+<div class="question" id="question"></div>
+<div class="answers" id="answers"></div>
+<div id="feedback" class="feedback"></div>
+<button id="next" class="btn green hidden" onclick="nextQuestion()">SIGUIENTE ➜</button>
+</section>
+
+<section id="end" class="screen hidden">
+<h2 style="text-align:center">🎉 ¡Juego terminado!</h2>
+<div class="score" id="finalScore">0</div>
+<p style="text-align:center">puntos</p>
+<div style="text-align:center"><span class="badge" id="result"></span></div>
+<p id="summary" style="text-align:center"></p>
+<button class="btn primary" onclick="startGame()">🔄 JUGAR DE NUEVO</button>
+</section>
+</div>
+
+<script>
+const questions=[
+{q:"¿A qué grupo pertenece la cuenta CAJA?",c:"Clasificación",a:["Activo","Pasivo","Patrimonio","Gasto"],x:0},
+{q:"¿A qué grupo pertenece PROVEEDORES?",c:"Clasificación",a:["Activo","Pasivo","Ingreso","Gasto"],x:1},
+{q:"¿A qué grupo pertenece CAPITAL?",c:"Clasificación",a:["Activo","Pasivo","Patrimonio","Gasto"],x:2},
+{q:"¿A qué grupo pertenece VENTAS?",c:"Clasificación",a:["Activo","Pasivo","Ingreso","Patrimonio"],x:2},
+{q:"¿A qué grupo pertenece ALQUILERES PAGADOS?",c:"Clasificación",a:["Activo","Pasivo","Ingreso","Gasto"],x:3},
+{q:"Cuando aumenta CAJA, ¿dónde se registra?",c:"Debe o Haber",a:["Debe","Haber","En ambos","No se registra"],x:0},
+{q:"Cuando aumenta PROVEEDORES, ¿dónde se registra?",c:"Debe o Haber",a:["Debe","Haber","En ambos","No se registra"],x:1},
+{q:"Cuando disminuye CAJA, ¿dónde se registra?",c:"Debe o Haber",a:["Debe","Haber","En ambos","No se registra"],x:1},
+{q:"Cuando aumenta VENTAS, ¿dónde se registra?",c:"Debe o Haber",a:["Debe","Haber","En ambos","No se registra"],x:1},
+{q:"Cuando aumenta un GASTO, normalmente se registra en:",c:"Debe o Haber",a:["Debe","Haber","En ambos","No se registra"],x:0},
+{q:"¿Cuál de estas es una cuenta de Activo?",c:"Plan de cuentas",a:["Bancos","Sueldos por pagar","Capital","Ventas"],x:0},
+{q:"¿Cuál de estas es una cuenta de Pasivo?",c:"Plan de cuentas",a:["Mercaderías","Clientes","Documentos por pagar","Caja"],x:2},
+{q:"¿Cuál de estas es una cuenta de Gasto?",c:"Plan de cuentas",a:["Compras","Ventas","Capital","Bancos"],x:0},
+{q:"Una empresa comercial se dedica principalmente a:",c:"Empresa comercial",a:["Comprar y vender bienes","Fabricar maquinaria","Prestar servicios médicos","Construir viviendas"],x:0},
+{q:"¿Qué documento respalda normalmente una compra o venta?",c:"Documentación",a:["Factura","Calendario","Recibo de luz únicamente","Lista de asistencia"],x:0}
+];
+
+let current=0,score=0,lives=3,answered=false;
+function startGame(){
+ current=0;score=0;lives=3;answered=false;
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("end").classList.add("hidden");
+ document.getElementById("game").classList.remove("hidden");
+ showQuestion();
+}
+function showQuestion(){
+ answered=false;
+ const q=questions[current];
+ document.getElementById("score").textContent=score;
+ document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+ document.getElementById("counter").textContent=(current+1)+"/"+questions.length;
+ document.getElementById("bar").style.width=((current)/questions.length*100)+"%";
+ document.getElementById("category").textContent="Tema: "+q.c;
+ document.getElementById("question").textContent=q.q;
+ document.getElementById("feedback").style.display="none";
+ document.getElementById("next").classList.add("hidden");
+ const box=document.getElementById("answers");box.innerHTML="";
+ q.a.forEach((text,i)=>{
+  const b=document.createElement("button");b.className="answer";b.textContent=text;
+  b.onclick=()=>answer(i,b);box.appendChild(b);
+ });
+}
+function answer(i,button){
+ if(answered)return;answered=true;
+ const q=questions[current],buttons=document.querySelectorAll(".answer");
+ buttons.forEach(b=>b.disabled=true);
+ const fb=document.getElementById("feedback");
+ if(i===q.x){
+  score+=100;button.classList.add("correct");
+  fb.className="feedback ok";fb.textContent="✅ ¡Correcto! +100 puntos";
+ }else{
+  lives--;button.classList.add("wrong");buttons[q.x].classList.add("correct");
+  fb.className="feedback bad";fb.textContent="❌ Incorrecto. La respuesta correcta es: "+q.a[q.x];
+ }
+ fb.style.display="block";
+ document.getElementById("score").textContent=score;
+ document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+ if(lives<=0 || current===questions.length-1){
+  document.getElementById("next").textContent="VER RESULTADO 🏆";
+ }else document.getElementById("next").textContent="SIGUIENTE ➜";
+ document.getElementById("next").classList.remove("hidden");
+}
+function nextQuestion(){
+ if(lives<=0 || current===questions.length-1){endGame();return}
+ current++;showQuestion();
+}
+function endGame(){
+ document.getElementById("game").classList.add("hidden");
+ document.getElementById("end").classList.remove("hidden");
+ document.getElementById("finalScore").textContent=score;
+ let r=score>=1300?"🏆 CONTADOR EXPERTO":score>=900?"🥇 MUY BUEN TRABAJO":score>=600?"📘 VAS POR BUEN CAMINO":"💪 SEGUÍ PRACTICANDO";
+ document.getElementById("result").textContent=r;
+ document.getElementById("summary").textContent="Obtuviste "+score+" de "+questions.length*100+" puntos.";
+}
+</script>
+</body>
+</html>
