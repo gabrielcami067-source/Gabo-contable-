@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GABO CONTABLE - Quinto de Secundaria</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f3f5f8;color:#17202a}
+.wrap{max-width:700px;margin:auto;padding:22px}
+.card{background:white;border-radius:18px;padding:24px;box-shadow:0 5px 20px #0001}
+h1{text-align:center;margin-top:0}
+input{width:100%;box-sizing:border-box;padding:14px;border:1px solid #bbb;border-radius:10px;font-size:17px;margin:12px 0 18px}
+button{width:100%;padding:14px;border:0;border-radius:10px;font-size:17px;font-weight:bold;background:#1f6feb;color:white;margin-top:10px}
+button.secondary{background:#555}
+.hidden{display:none}
+.meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:18px;font-weight:bold}
+.question{font-size:19px;line-height:1.5;background:#f7f8fa;padding:18px;border-radius:12px}
+.small{font-size:13px;color:#667085;text-align:center}
+.final{font-size:18px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card" id="start">
+<h1>📚 GABO CONTABLE</h1><h2 style="text-align:center;margin-top:-8px">QUINTO DE SECUNDARIA</h2>
+<p style="text-align:center">Reto de Asientos Contables</p>
+<label><b>Nombre completo</b></label>
+<input id="name" type="text" autocomplete="name" placeholder="Escribe tu nombre completo">
+<button onclick="startGame()">COMENZAR JUEGO</button>
+<p class="small">8 operaciones · Tiempo máximo: 40 minutos</p>
+</div>
+
+<div class="card hidden" id="game">
+<div class="meta"><span id="counter"></span><span id="timer">40:00</span></div>
+<div class="question" id="question"></div>
+<p class="small">Realiza el asiento contable en tu cuaderno y luego presiona Siguiente.</p>
+<button onclick="nextQuestion()">SIGUIENTE</button>
+<button class="secondary" onclick="finishGame()">FINALIZAR JUEGO</button>
+</div>
+
+<div class="card hidden" id="finish">
+<h1>🏁 JUEGO TERMINADO</h1>
+<div class="final">
+<p><b>Nombre:</b> <span id="fName"></span></p>
+<p><b>Hora de inicio:</b> <span id="fStart"></span></p>
+<p><b>Hora de finalización:</b> <span id="fEnd"></span></p>
+<p><b>Duración:</b> <span id="fDuration"></span></p>
+<p><b>Veces que salió de la pantalla:</b> <span id="fOut"></span></p>
+<p><b>Veces que volvió a la pantalla:</b> <span id="fBack"></span></p>
+</div>
+<p class="small">Guarda esta pantalla para que el docente pueda revisarla.</p>
+</div>
+</div>
+
+<script>
+const bank=[
+"Se compra mercadería al contado por Bs 8.500, pagando en efectivo.",
+"Se compra mercadería a crédito por Bs 12.000.",
+"Se realiza una venta de mercadería al contado por Bs 9.300, cobrando en efectivo.",
+"Se realiza una venta de mercadería a crédito por Bs 7.800.",
+"Se deposita en la cuenta bancaria Bs 5.000 provenientes de Caja.",
+"Se paga a un proveedor Bs 4.500 mediante cheque.",
+"Un cliente cancela Bs 3.800 de su deuda mediante depósito bancario.",
+"Se compra un mueble para la oficina por Bs 2.500, pagando mediante cheque.",
+"Se compra un equipo de computación por Bs 6.800, pagando mediante cheque.",
+"Se compra un vehículo para la empresa por Bs 45.000; se paga Bs 15.000 mediante cheque y el saldo queda pendiente.",
+"Se compra una motocicleta para la empresa por Bs 18.500; se paga Bs 8.500 mediante cheque y el saldo queda pendiente.",
+"Se paga el alquiler del local por Bs 2.000 mediante cheque.",
+"Se recibe una factura por alquiler del local de Bs 2.000, quedando pendiente de pago.",
+"Se cobran Bs 3.500 correspondientes a alquileres de un inmueble, mediante depósito bancario.",
+"Se paga el servicio de electricidad por Bs 650 mediante cheque.",
+"Se genera un gasto general de Bs 500, pagado en efectivo.",
+"Se compra mercadería por Bs 10.000: Bs 4.000 al contado y Bs 6.000 a crédito.",
+"Se realiza una venta por Bs 12.000: Bs 7.000 al contado y Bs 5.000 a crédito.",
+"Se paga Bs 1.500 por publicidad mediante cheque.",
+"Se paga Bs 450 por servicio de Internet mediante cheque.",
+"Se paga Bs 800 por transporte de mercaderías en efectivo.",
+"Se pagan Bs 1.200 por comisiones mediante cheque.",
+"Se pagan Bs 900 por pasajes y viáticos mediante cheque.",
+"Se paga Bs 1.800 por mantenimiento y reparación de un vehículo mediante cheque.",
+"Se entrega un anticipo a un proveedor de Bs 2.500 mediante cheque.",
+"Se entrega un anticipo de sueldo a un trabajador de Bs 1.200 en efectivo.",
+"Se registra una cuenta por cobrar a un cliente por Bs 4.600 correspondiente a una venta de mercadería.",
+"Se registra una cuenta por pagar a un proveedor por Bs 5.700 correspondiente a una compra de mercadería.",
+"Se compra un equipo de computación por Bs 7.500: se paga Bs 3.000 en efectivo y el saldo queda pendiente.",
+"Se compra muebles y enseres por Bs 4.000 a crédito.",
+"Se paga una cuenta por pagar de Bs 3.200 mediante cheque.",
+"Un cliente paga Bs 2.700 de una cuenta por cobrar mediante depósito bancario.",
+"Se compra mercadería al contado por Bs 6.400 mediante cheque.",
+"Se compra mercadería a crédito por Bs 9.750.",
+"Se realiza una venta al contado por Bs 8.600 mediante depósito bancario.",
+"Se realiza una venta a crédito por Bs 11.200.",
+"Se paga alquiler del local por Bs 2.300 en efectivo.",
+"Se recibe el pago de un alquiler pendiente por Bs 2.800 mediante depósito bancario.",
+"Se recibe una factura de electricidad por Bs 720, quedando pendiente de pago.",
+"Se cancela mediante cheque una factura de electricidad pendiente de Bs 720.",
+"Se compra un vehículo por Bs 52.000, pagando Bs 20.000 mediante cheque y el saldo a crédito.",
+"Se compra una motocicleta por Bs 16.000, pagando Bs 6.000 en efectivo y el saldo a crédito.",
+"Se paga Bs 950 por gastos generales mediante cheque.",
+"Se paga Bs 1.000 por publicidad mediante efectivo.",
+"Se paga Bs 500 por servicio de Internet mediante cheque.",
+"Se paga Bs 700 por transporte mediante efectivo.",
+"Se pagan Bs 1.400 por comisiones mediante cheque.",
+"Se pagan Bs 1.100 por pasajes y viáticos mediante cheque.",
+"Se paga Bs 2.000 por mantenimiento y reparación de muebles y enseres mediante cheque."
+];
+
+let selected=[],idx=0,startTime=null,endTime=null,timerId=null,outCount=0,backCount=0,wasHidden=false;
+
+function shuffle(a){return a.map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.x)}
+function startGame(){
+ const name=document.getElementById("name").value.trim();
+ if(!name){alert("Escribe tu nombre completo para comenzar.");return}
+ selected=shuffle(bank).slice(0,8); idx=0; outCount=0; backCount=0;
+ startTime=new Date();
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("game").classList.remove("hidden");
+ showQuestion();
+ timerId=setInterval(updateTimer,1000);
+ updateTimer();
+}
+function showQuestion(){
+ document.getElementById("counter").textContent=`Pregunta ${idx+1} de 8`;
+ document.getElementById("question").textContent=selected[idx];
+}
+function nextQuestion(){
+ if(idx<7){idx++;showQuestion()} else finishGame();
+}
+function updateTimer(){
+ const elapsed=Math.floor((Date.now()-startTime.getTime())/1000), remain=Math.max(0,2400-elapsed);
+ const m=String(Math.floor(remain/60)).padStart(2,"0"),s=String(remain%60).padStart(2,"0");
+ document.getElementById("timer").textContent=`${m}:${s}`;
+ if(remain===0) finishGame();
+}
+function finishGame(){
+ if(!startTime)return;
+ if(timerId){clearInterval(timerId);timerId=null}
+ endTime=new Date();
+ document.getElementById("game").classList.add("hidden");
+ document.getElementById("finish").classList.remove("hidden");
+ const name=document.getElementById("name").value.trim();
+ document.getElementById("fName").textContent=name;
+ document.getElementById("fStart").textContent=startTime.toLocaleTimeString();
+ document.getElementById("fEnd").textContent=endTime.toLocaleTimeString();
+ const sec=Math.floor((endTime-startTime)/1000);
+ document.getElementById("fDuration").textContent=`${Math.floor(sec/60)} min ${sec%60} s`;
+ document.getElementById("fOut").textContent=outCount;
+ document.getElementById("fBack").textContent=backCount;
+}
+document.addEventListener("visibilitychange",()=>{
+ if(!startTime || document.getElementById("game").classList.contains("hidden"))return;
+ if(document.hidden){outCount++;wasHidden=true}
+ else if(wasHidden){backCount++;wasHidden=false}
+});
+</script>
+</body>
+</html>
