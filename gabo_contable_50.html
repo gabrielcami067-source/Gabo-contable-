@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0b2a5b">
+<title>GABO CONTABLE · Desafío 50</title>
+<style>
+:root{--blue:#0b2a5b;--blue2:#1464c8;--gold:#f5b700;--green:#16a34a;--red:#dc2626;--ink:#152238}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#081a36;color:var(--ink)}
+body{padding:12px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+body:before{content:"Σ  DEBE   •   HABER   •   ACTIVO   •   PASIVO   •   PATRIMONIO   •   INGRESOS   •   GASTOS   •   COSTOS   •   $   Bs   IVA   Σ";position:fixed;inset:0;z-index:-1;opacity:.08;color:#fff;font-size:22px;line-height:3.3;transform:rotate(-10deg);pointer-events:none}
+.app{max-width:760px;margin:auto;background:#fff;border-radius:25px;overflow:hidden;box-shadow:0 22px 70px #0009}
+header{background:linear-gradient(135deg,#08245a,#1976d2);color:#fff;text-align:center;padding:22px 18px;border-bottom:5px solid var(--gold)}
+.logo{font-size:29px;font-weight:900;letter-spacing:.5px}.tag{font-size:14px;margin-top:5px;opacity:.92}
+.screen{padding:24px}.hidden{display:none!important}
+.hero{background:linear-gradient(135deg,#eff6ff,#f8fafc);border:2px solid #dbeafe;border-radius:18px;padding:18px}
+h2{margin-top:0;color:var(--blue)}h3{color:var(--blue)}
+input{width:100%;padding:15px;border:2px solid #cbd5e1;border-radius:13px;font-size:17px;margin:8px 0 5px}
+.btn{width:100%;border:0;border-radius:14px;padding:15px 18px;font-size:17px;font-weight:800;cursor:pointer;margin-top:12px}
+.primary{background:var(--blue2);color:#fff}.green{background:var(--green);color:#fff}.gray{background:#e5e7eb;color:#172033}
+.info{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.box{background:#f1f5f9;border-radius:13px;padding:10px;text-align:center;font-size:12px}.box b{display:block;color:var(--blue2);font-size:19px;margin-top:3px}
+.progress{height:10px;background:#e2e8f0;border-radius:30px;overflow:hidden;margin:12px 0 18px}.bar{height:100%;background:linear-gradient(90deg,var(--blue2),var(--gold));transition:.25s}
+.topic{display:inline-block;background:#e0ecff;color:#0b4a9b;border-radius:20px;padding:7px 11px;font-size:13px;font-weight:800}
+.question{font-size:23px;font-weight:900;line-height:1.3;margin:15px 0}.answers{display:grid;gap:10px}.answer{width:100%;padding:15px;border:2px solid #d7dee8;border-radius:14px;background:#fff;text-align:left;font-size:16px;font-weight:700;cursor:pointer}.answer:disabled{cursor:default}.answer.correct{background:#dcfce7;border-color:#16a34a;color:#166534}.answer.wrong{background:#fee2e2;border-color:#dc2626;color:#991b1b}
+.feedback{margin-top:14px;border-radius:14px;padding:14px;font-weight:800;line-height:1.45}.ok{background:#dcfce7;color:#166534}.bad{background:#fee2e2;color:#991b1b}
+.warn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;border-radius:13px;padding:12px;margin-top:12px;font-size:13px}
+.resultScore{text-align:center;font-size:62px;font-weight:900;color:var(--blue2);margin:10px}.resultCard{background:#f8fafc;border:2px solid #e2e8f0;border-radius:18px;padding:18px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e2e8f0}.row:last-child{border-bottom:0}.badge{display:inline-block;padding:8px 12px;border-radius:20px;font-weight:900}
+.good{background:#dcfce7;color:#166534}.attention{background:#fff7ed;color:#9a3412}.danger{background:#fee2e2;color:#991b1b}
+.small{font-size:13px;color:#64748b;line-height:1.5}
+@media(max-width:560px){.info{grid-template-columns:repeat(2,1fr)}.question{font-size:20px}.screen{padding:18px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">📚 GABO CONTABLE</div><div class="tag">DESAFÍO DIDÁCTICO · PLAN DE CUENTAS COMERCIAL</div></header>
+
+<section id="start" class="screen">
+<div class="hero">
+<h2>🎮 Desafío de 50 preguntas</h2>
+<p>El estudiante responderá <b>50 preguntas aleatorias</b> de un banco amplio sobre:</p>
+<p><b>ACTIVO · PASIVO · PATRIMONIO · INGRESOS · COSTOS · GASTOS</b></p>
+<p>Cada pregunta vale <b>1 punto</b>. La nota final será sobre <b>50 puntos</b>.</p>
+<input id="studentName" maxlength="50" placeholder="Nombre completo del estudiante">
+<button class="btn primary" onclick="startGame()">▶ COMENZAR EVALUACIÓN</button>
+<p class="small">⚠️ Durante la evaluación, si el estudiante sale de la página o cambia de aplicación, se registra una salida y aparece una advertencia. Al terminar se muestra el número de salidas en este mismo celular.</p>
+</div>
+</section>
+
+<section id="game" class="screen hidden">
+<div class="info">
+<div class="box">Puntos<b id="score">0</b></div>
+<div class="box">Pregunta<b id="counter">1/50</b></div>
+<div class="box">Salidas<b id="exits">0</b></div>
+<div class="box">Tiempo<b id="timer">30</b></div>
+</div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div id="topic" class="topic">Tema</div>
+<div id="question" class="question"></div>
+<div id="answers" class="answers"></div>
+<div id="feedback" class="feedback hidden"></div>
+<div id="exitNotice" class="warn hidden"></div>
+<button id="next" class="btn green hidden" onclick="nextQuestion()">SIGUIENTE ➜</button>
+</section>
+
+<section id="end" class="screen hidden">
+<h2 style="text-align:center">🏆 Evaluación terminada</h2>
+<p style="text-align:center" id="studentResult"></p>
+<div class="resultScore" id="finalScore">0/50</div>
+<div class="resultCard">
+<div class="row"><b>Respuestas correctas</b><span id="correctCount"></span></div>
+<div class="row"><b>Respuestas incorrectas</b><span id="wrongCount"></span></div>
+<div class="row"><b>Veces que salió de la página</b><span id="finalExits"></span></div>
+<div class="row"><b>Estado de control</b><span id="exitStatus"></span></div>
+</div>
+<p id="learningMessage" style="text-align:center;font-weight:800;margin-top:18px"></p>
+<p class="small">Este control registra cuando la página pierde visibilidad/foco. En iPhone una página web no puede bloquear ni detectar de forma fiable una captura de pantalla.</p>
+<button class="btn primary" onclick="location.reload()">🔄 NUEVA EVALUACIÓN</button>
+</section>
+</div>
+
+<script>
+const BANK=[
+["CAJA MONEDA NACIONAL pertenece a:",["Activo","Pasivo","Patrimonio","Gasto"],0,"Activo"],
+["CAJA MONEDA EXTRANJERA pertenece a:",["Activo","Pasivo","Ingreso","Costo"],0,"Activo"],
+["BANCO MONEDA NACIONAL pertenece a:",["Activo","Pasivo","Patrimonio","Gasto"],0,"Activo"],
+["BANCO UNIÓN M/N es una cuenta de:",["Activo","Pasivo","Ingreso","Costo"],0,"Activo"],
+["BANCO BISA M/N es una cuenta de:",["Activo","Pasivo","Patrimonio","Gasto"],0,"Activo"],
+["CAJA CHICA MONEDA NACIONAL pertenece a:",["Activo","Pasivo","Ingreso","Patrimonio"],0,"Activo"],
+["CUENTAS POR COBRAR M/N pertenece a:",["Activo","Pasivo","Patrimonio","Ingreso"],0,"Activo"],
+["DOCUMENTOS POR COBRAR M/N pertenece a:",["Activo","Pasivo","Gasto","Patrimonio"],0,"Activo"],
+["ANTICIPO A PROVEEDORES pertenece a:",["Activo","Pasivo","Ingreso","Costo"],0,"Activo"],
+["CUENTAS POR COBRAR AL PERSONAL pertenece a:",["Activo","Pasivo","Patrimonio","Gasto"],0,"Activo"],
+["PRÉSTAMOS AL PERSONAL pertenece a:",["Activo","Pasivo","Ingreso","Costo"],0,"Activo"],
+["CRÉDITO FISCAL IVA pertenece a:",["Activo","Pasivo","Ingreso","Gasto"],0,"Activo"],
+["IUE POR COMPENSAR pertenece a:",["Activo","Pasivo","Patrimonio","Costo"],0,"Activo"],
+["INVENTARIO DE MERCADERÍAS pertenece a:",["Activo","Pasivo","Ingreso","Gasto"],0,"Activo"],
+["MERCADERÍAS EN TRÁNSITO pertenece a:",["Activo","Pasivo","Patrimonio","Ingreso"],0,"Activo"],
+["SEGUROS PAGADOS POR ADELANTADO pertenece a:",["Activo","Pasivo","Ingreso","Patrimonio"],0,"Activo"],
+["ALQUILERES PAGADOS POR ADELANTADO pertenece a:",["Activo","Pasivo","Gasto","Ingreso"],0,"Activo"],
+["TERRENO pertenece a:",["Activo","Pasivo","Patrimonio","Ingreso"],0,"Activo"],
+["EDIFICIOS pertenece a:",["Activo","Pasivo","Gasto","Ingreso"],0,"Activo"],
+["VEHÍCULOS pertenece a:",["Activo","Pasivo","Patrimonio","Costo"],0,"Activo"],
+["EQUIPOS DE COMPUTACIÓN pertenece a:",["Activo","Pasivo","Ingreso","Gasto"],0,"Activo"],
+["MARCAS DE FÁBRICA pertenece a:",["Activo","Pasivo","Patrimonio","Gasto"],0,"Activo"],
+["PATENTES pertenece a:",["Activo","Pasivo","Ingreso","Costo"],0,"Activo"],
+["INVERSIONES PERMANENTES pertenece a:",["Activo","Pasivo","Gasto","Ingreso"],0,"Activo"],
+["CUENTAS POR PAGAR MONEDA NACIONAL pertenece a:",["Pasivo","Activo","Patrimonio","Ingreso"],0,"Pasivo"],
+["CUENTAS POR PAGAR MONEDA EXTRANJERA pertenece a:",["Pasivo","Activo","Gasto","Costo"],0,"Pasivo"],
+["DOCUMENTOS POR PAGAR M/N pertenece a:",["Pasivo","Activo","Ingreso","Patrimonio"],0,"Pasivo"],
+["ALQUILERES POR PAGAR pertenece a:",["Pasivo","Activo","Ingreso","Gasto"],0,"Pasivo"],
+["COMISIONES POR PAGAR pertenece a:",["Pasivo","Activo","Patrimonio","Ingreso"],0,"Pasivo"],
+["INTERESES POR PAGAR pertenece a:",["Pasivo","Activo","Ingreso","Patrimonio"],0,"Pasivo"],
+["SERVICIOS BÁSICOS POR PAGAR pertenece a:",["Pasivo","Activo","Costo","Ingreso"],0,"Pasivo"],
+["SUELDOS Y SALARIOS POR PAGAR pertenece a:",["Pasivo","Activo","Patrimonio","Ingreso"],0,"Pasivo"],
+["AGUINALDO POR PAGAR pertenece a:",["Pasivo","Activo","Gasto","Ingreso"],0,"Pasivo"],
+["DÉBITO FISCAL IVA pertenece a:",["Pasivo","Activo","Ingreso","Costo"],0,"Pasivo"],
+["IT POR PAGAR pertenece a:",["Pasivo","Activo","Patrimonio","Ingreso"],0,"Pasivo"],
+["IUE POR PAGAR pertenece a:",["Pasivo","Activo","Gasto","Costo"],0,"Pasivo"],
+["PRÉSTAMOS BANCARIOS POR PAGAR pertenece a:",["Pasivo","Activo","Ingreso","Patrimonio"],0,"Pasivo"],
+["HIPOTECA POR PAGAR pertenece a:",["Pasivo","Activo","Gasto","Ingreso"],0,"Pasivo"],
+["BONOS POR PAGAR pertenece a:",["Pasivo","Activo","Patrimonio","Costo"],0,"Pasivo"],
+["ANTICIPO DE CLIENTE pertenece a:",["Pasivo","Activo","Ingreso","Gasto"],0,"Pasivo"],
+["CAPITAL SOCIAL pertenece a:",["Patrimonio","Activo","Pasivo","Gasto"],0,"Patrimonio"],
+["RESERVA LEGAL pertenece a:",["Patrimonio","Activo","Pasivo","Costo"],0,"Patrimonio"],
+["RESERVA ESTATUTARIA pertenece a:",["Patrimonio","Activo","Ingreso","Gasto"],0,"Patrimonio"],
+["RESULTADOS ACUMULADOS pertenece a:",["Patrimonio","Activo","Pasivo","Costo"],0,"Patrimonio"],
+["RESULTADOS DE LA GESTIÓN pertenece a:",["Patrimonio","Activo","Pasivo","Gasto"],0,"Patrimonio"],
+["VENTAS es una cuenta de:",["Ingreso","Activo","Pasivo","Gasto"],0,"Ingresos"],
+["ALQUILERES PERCIBIDOS es una cuenta de:",["Ingreso","Activo","Pasivo","Costo"],0,"Ingresos"],
+["COMISIONES PERCIBIDAS es una cuenta de:",["Ingreso","Activo","Pasivo","Gasto"],0,"Ingresos"],
+["DIVIDENDOS GANADOS es una cuenta de:",["Ingreso","Activo","Pasivo","Costo"],0,"Ingresos"],
+["INTERESES PERCIBIDOS es una cuenta de:",["Ingreso","Activo","Pasivo","Gasto"],0,"Ingresos"],
+["INGRESOS FINANCIEROS pertenece a:",["Ingreso","Activo","Pasivo","Costo"],0,"Ingresos"],
+["UTILIDAD EN VENTA DE ACTIVO FIJO pertenece a:",["Ingreso","Activo","Pasivo","Gasto"],0,"Ingresos"],
+["DIFERENCIA DE CAMBIO, cuando representa un resultado favorable, es:",["Ingreso","Activo","Pasivo","Costo"],0,"Ingresos"],
+["DEVOLUCIONES EN VENTAS normalmente es una cuenta:",["Contraingreso","Activo","Pasivo","Patrimonio"],0,"Ingresos"],
+["DESCUENTOS EN VENTAS normalmente es una cuenta:",["Contraingreso","Activo","Pasivo","Costo"],0,"Ingresos"],
+["COMPRAS DE MERCADERÍAS en sistema periódico se relaciona con:",["Costo","Activo","Pasivo","Patrimonio"],0,"Costos"],
+["FLETES EN COMPRAS en sistema periódico se relaciona con:",["Costo","Ingreso","Pasivo","Patrimonio"],0,"Costos"],
+["RECARGO EN COMPRAS en sistema periódico se relaciona con:",["Costo","Activo","Ingreso","Pasivo"],0,"Costos"],
+["COSTO DE VENTAS corresponde a:",["Costo","Activo","Pasivo","Patrimonio"],0,"Costos"],
+["SUELDOS Y SALARIOS como gasto de operación pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["CARGAS SOCIALES pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["SEGUROS como gasto de operación pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["HONORARIOS PROFESIONALES pertenece a:",["Gasto","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["ALQUILERES como gasto de operación pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["INTERESES como gasto de operación pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["COMISIONES como gasto de operación pertenece a:",["Gasto","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["MATERIAL DE ESCRITORIO pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["SUMINISTROS DE OFICINA pertenece a:",["Gasto","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["IMPUESTO A LAS TRANSACCIONES como gasto pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["DEPRECIACIÓN DE EDIFICIO pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["DEPRECIACIÓN DE EQUIPO DE COMPUTACIÓN pertenece a:",["Gasto","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["DEPRECIACIÓN DE VEHÍCULO pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["PUBLICIDAD pertenece a:",["Gasto","Activo","Pasivo","Costo"],0,"Gastos"],
+["SERVICIOS BÁSICOS pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["SERVICIOS DE INTERNET pertenece a:",["Gasto","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["IMPRESIONES Y FOTOCOPIAS pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["GASTOS DE REPRESENTACIÓN pertenece a:",["Gasto","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["INTERESES BANCARIOS pertenece a:",["Gasto financiero","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["COMISIONES BANCARIAS pertenece a:",["Gasto financiero","Activo","Pasivo","Patrimonio"],0,"Gastos"],
+["I.T.F. pertenece normalmente a:",["Gasto financiero","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["PÉRDIDA EN VENTA DE ACTIVO FIJO pertenece a:",["Gasto no operativo","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["DONACIONES Y OBSEQUIOS pertenece a:",["Gasto no operativo","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["PÉRDIDA POR SINIESTROS pertenece a:",["Gasto no operativo","Activo","Pasivo","Ingreso"],0,"Gastos"],
+["¿Qué grupo representa los recursos controlados por la empresa?",["Activo","Pasivo","Patrimonio","Gasto"],0,"Conceptos"],
+["¿Qué grupo representa obligaciones de la empresa?",["Pasivo","Activo","Ingreso","Costo"],0,"Conceptos"],
+["¿Qué grupo representa la participación residual de los propietarios?",["Patrimonio","Activo","Pasivo","Gasto"],0,"Conceptos"],
+["¿Qué grupo representa entradas o incrementos económicos por actividades de la empresa?",["Ingresos","Pasivo","Activo","Costo"],0,"Conceptos"],
+["¿Qué grupo representa el sacrificio económico asociado a la venta de mercaderías?",["Costos","Activo","Pasivo","Patrimonio"],0,"Conceptos"],
+["¿Qué grupo reúne consumos necesarios para operar y administrar?",["Gastos","Activo","Pasivo","Ingresos"],0,"Conceptos"]
+];
+
+let quiz=[],current=0,score=0,correct=0,wrong=0,exits=0,locked=false,timerId=null,time=30,student="";
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startGame(){
+ student=document.getElementById("studentName").value.trim();
+ if(!student){alert("Ingresá el nombre completo del estudiante.");return}
+ quiz=shuffle([...BANK]).slice(0,50);current=0;score=0;correct=0;wrong=0;exits=0;
+ document.getElementById("start").classList.add("hidden");document.getElementById("end").classList.add("hidden");document.getElementById("game").classList.remove("hidden");
+ showQuestion();
+}
+function showQuestion(){
+ locked=false;clearInterval(timerId);time=30;
+ const q=quiz[current];
+ document.getElementById("score").textContent=score;
+ document.getElementById("counter").textContent=(current+1)+"/50";
+ document.getElementById("exits").textContent=exits;
+ document.getElementById("timer").textContent=time;
+ document.getElementById("bar").style.width=(current/50*100)+"%";
+ document.getElementById("topic").textContent="Tema: "+q[3];
+ document.getElementById("question").textContent=q[0];
+ document.getElementById("feedback").className="feedback hidden";
+ document.getElementById("exitNotice").className="warn hidden";
+ document.getElementById("next").classList.add("hidden");
+ const options=q[1].map((t,i)=>({t,i}));shuffle(options);
+ const correctIndex=options.findIndex(o=>o.i===q[2]);
+ quiz[current][4]=correctIndex;
+ const box=document.getElementById("answers");box.innerHTML="";
+ options.forEach((o,i)=>{const b=document.createElement("button");b.className="answer";b.textContent=o.t;b.onclick=()=>answer(i,b);box.appendChild(b)});
+ timerId=setInterval(()=>{time--;document.getElementById("timer").textContent=time;if(time<=0){clearInterval(timerId);answer(-1,null)}},1000);
+}
+function answer(choice,button){
+ if(locked)return;locked=true;clearInterval(timerId);
+ const q=quiz[current],buttons=document.querySelectorAll(".answer"),correctIndex=q[4];
+ buttons.forEach(b=>b.disabled=true);
+ const fb=document.getElementById("feedback");
+ if(choice===correctIndex){score++;correct++;if(button)button.classList.add("correct");fb.className="feedback ok";fb.innerHTML="✅ <b>¡Correcto!</b> +1 punto."}
+ else{wrong++;if(button)button.classList.add("wrong");if(buttons[correctIndex])buttons[correctIndex].classList.add("correct");fb.className="feedback bad";fb.innerHTML="❌ <b>Respuesta incorrecta.</b><br>La respuesta correcta es: <b>"+q[1][q[2]]+"</b>";}
+ fb.classList.remove("hidden");
+ document.getElementById("score").textContent=score;
+ document.getElementById("next").textContent=current===49?"🏆 VER RESULTADO":"SIGUIENTE ➜";
+ document.getElementById("next").classList.remove("hidden");
+}
+function nextQuestion(){if(current===49){finish()}else{current++;showQuestion()}}
+function finish(){
+ clearInterval(timerId);document.getElementById("game").classList.add("hidden");document.getElementById("end").classList.remove("hidden");
+ document.getElementById("studentResult").textContent="👤 Estudiante: "+student;
+ document.getElementById("finalScore").textContent=score+"/50";
+ document.getElementById("correctCount").textContent=correct;
+ document.getElementById("wrongCount").textContent=wrong;
+ document.getElementById("finalExits").textContent=exits;
+ const status=document.getElementById("exitStatus"),msg=document.getElementById("learningMessage");
+ if(exits===0){status.innerHTML='<span class="badge good">✅ SIN SALIDAS</span>';msg.textContent="👏 Excelente: completó la evaluación sin salir de la página."}
+ else if(exits<=2){status.innerHTML='<span class="badge attention">⚠️ '+exits+' SALIDA(S)</span>';msg.textContent="⚠️ La evaluación registra "+exits+" salida(s) de la página."}
+ else{status.innerHTML='<span class="badge danger">🔴 '+exits+' SALIDAS</span>';msg.textContent="🔴 Atención: se registraron "+exits+" salidas de la evaluación."}
+}
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden && !document.getElementById("game").classList.contains("hidden") && !locked){
+   exits++;document.getElementById("exits").textContent=exits;
+   setTimeout(()=>{if(!document.hidden){alert("⚠️ AVISO DE EVALUACIÓN\n\nSaliste de la página o cambiaste de aplicación.\nSalidas registradas: "+exits);}},80);
+ }
+});
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("selectstart",e=>e.preventDefault());
+document.addEventListener("copy",e=>e.preventDefault());
+document.addEventListener("cut",e=>e.preventDefault());
+document.addEventListener("dragstart",e=>e.preventDefault());
+</script>
+</body>
+</html>
